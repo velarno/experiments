@@ -1,6 +1,6 @@
+mod commands;
 mod config;
 mod git;
-mod commands;
 
 use anyhow::Result;
 use clap::{Parser, Subcommand};
@@ -60,10 +60,18 @@ fn main() -> Result<()> {
     let cli = Cli::parse();
 
     match cli.command {
-        Commands::New { workspace, name, email } => {
+        Commands::New {
+            workspace,
+            name,
+            email,
+        } => {
             commands::new_workspace(&workspace, &name, &email)?;
         }
-        Commands::Update { workspace, name, email } => {
+        Commands::Update {
+            workspace,
+            name,
+            email,
+        } => {
             commands::update_workspace(&workspace, name.as_deref(), email.as_deref())?;
         }
         Commands::Use { workspace } => {

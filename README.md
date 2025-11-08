@@ -1,5 +1,8 @@
 # figgit
 
+[![CI](https://github.com/USERNAME/figgit/actions/workflows/ci.yml/badge.svg)](https://github.com/USERNAME/figgit/actions/workflows/ci.yml)
+[![Release](https://github.com/USERNAME/figgit/actions/workflows/release.yml/badge.svg)](https://github.com/USERNAME/figgit/actions/workflows/release.yml)
+
 A command-line tool for managing git configurations using workspace names.
 
 ## Overview
@@ -13,22 +16,41 @@ A command-line tool for managing git configurations using workspace names.
 - View current git configuration and compare with saved workspaces
 - Simple TOML-based configuration storage
 - Comprehensive error handling and user-friendly messages
+- Cross-platform support (Linux, macOS, Windows)
 
 ## Installation
+
+### Homebrew (macOS and Linux)
+
+```bash
+# Add the tap
+brew tap USERNAME/figgit
+
+# Install figgit
+brew install figgit
+```
+
+See [HOMEBREW.md](HOMEBREW.md) for detailed Homebrew distribution instructions.
+
+### Cargo
+
+```bash
+cargo install figgit
+```
 
 ### From Source
 
 ```bash
+git clone https://github.com/USERNAME/figgit.git
+cd figgit
 cargo build --release
 ```
 
 The binary will be available at `./target/release/figgit`.
 
-To install globally:
+### Pre-built Binaries
 
-```bash
-cargo install --path .
-```
+Download pre-built binaries for your platform from the [releases page](https://github.com/USERNAME/figgit/releases).
 
 ## Usage
 
@@ -36,12 +58,14 @@ cargo install --path .
 
 ```bash
 figgit new <workspace> --name "<name>" --email "<email>"
+# Or using short flags:
+figgit new <workspace> -n "<name>" -e "<email>"
 ```
 
 Example:
 ```bash
-figgit new work --name "John Doe" --email "john.doe@company.com"
-figgit new personal --name "John Doe" --email "john@personal.com"
+figgit new work -n "John Doe" -e "john.doe@company.com"
+figgit new personal -n "John Doe" -e "john@personal.com"
 ```
 
 ### View workspaces
@@ -69,17 +93,17 @@ This sets the local git `user.name` and `user.email` for the current repository.
 
 Update the name:
 ```bash
-figgit update work --name "Jane Doe"
+figgit update work -n "Jane Doe"
 ```
 
 Update the email:
 ```bash
-figgit update work --email "jane.doe@company.com"
+figgit update work -e "jane.doe@company.com"
 ```
 
 Update both:
 ```bash
-figgit update work --name "Jane Doe" --email "jane.doe@company.com"
+figgit update work -n "Jane Doe" -e "jane.doe@company.com"
 ```
 
 ### Check current status
@@ -150,8 +174,8 @@ All modules include unit tests that cover:
 
 ```bash
 # Set up your workspaces once
-figgit new work --name "Jane Developer" --email "jane@company.com"
-figgit new personal --name "Jane" --email "jane@personal.email"
+figgit new work -n "Jane Developer" -e "jane@company.com"
+figgit new personal -n "Jane" -e "jane@personal.email"
 
 # In a work repository
 cd ~/work/project
@@ -163,6 +187,27 @@ cd ~/personal/project
 figgit use personal
 figgit status  # Shows: ✓ Matches workspace: 'personal'
 ```
+
+## CI/CD
+
+This project uses GitHub Actions for continuous integration and deployment:
+
+- **CI Workflow**: Tests on Linux, macOS, and Windows on every push and pull request
+- **Release Workflow**: Builds binaries for all platforms when a version tag is pushed
+- **Code Coverage**: Tracks test coverage using cargo-tarpaulin
+
+To create a new release:
+
+```bash
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+The release workflow will automatically:
+- Build binaries for all supported platforms
+- Create a GitHub release
+- Upload the binaries as release artifacts
+- Publish to crates.io (if configured)
 
 ## Requirements
 

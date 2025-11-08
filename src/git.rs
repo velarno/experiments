@@ -1,6 +1,6 @@
-use anyhow::{Context, Result, bail};
-use std::process::Command;
+use anyhow::{bail, Context, Result};
 use std::path::Path;
+use std::process::Command;
 
 /// Check if the current directory is a git repository
 pub fn is_git_repo() -> bool {
@@ -14,7 +14,7 @@ pub fn get_local_user_name() -> Result<String> {
     }
 
     let output = Command::new("git")
-        .args(&["config", "--local", "user.name"])
+        .args(["config", "--local", "user.name"])
         .output()
         .context("Failed to execute git command")?;
 
@@ -41,7 +41,7 @@ pub fn get_local_user_email() -> Result<String> {
     }
 
     let output = Command::new("git")
-        .args(&["config", "--local", "user.email"])
+        .args(["config", "--local", "user.email"])
         .output()
         .context("Failed to execute git command")?;
 
@@ -68,7 +68,7 @@ pub fn set_local_user_name(name: &str) -> Result<()> {
     }
 
     let status = Command::new("git")
-        .args(&["config", "--local", "user.name", name])
+        .args(["config", "--local", "user.name", name])
         .status()
         .context("Failed to execute git command")?;
 
@@ -86,7 +86,7 @@ pub fn set_local_user_email(email: &str) -> Result<()> {
     }
 
     let status = Command::new("git")
-        .args(&["config", "--local", "user.email", email])
+        .args(["config", "--local", "user.email", email])
         .status()
         .context("Failed to execute git command")?;
 

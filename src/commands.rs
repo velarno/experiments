@@ -1,6 +1,6 @@
-use anyhow::Result;
 use crate::config::Config;
 use crate::git;
+use anyhow::Result;
 
 /// Create a new workspace configuration
 pub fn new_workspace(workspace: &str, name: &str, email: &str) -> Result<()> {
@@ -163,7 +163,9 @@ mod tests {
         // This is a basic test structure
         // In a real scenario, we'd need to mock the config path
         let mut config = Config::default();
-        config.add_workspace("test", "Test User", "test@example.com").unwrap();
+        config
+            .add_workspace("test", "Test User", "test@example.com")
+            .unwrap();
 
         assert!(config.get_workspace("test").is_ok());
     }
@@ -171,8 +173,12 @@ mod tests {
     #[test]
     fn test_update_workspace_modifies_existing() {
         let mut config = Config::default();
-        config.add_workspace("test", "Test User", "test@example.com").unwrap();
-        config.update_workspace("test", Some("New Name"), None).unwrap();
+        config
+            .add_workspace("test", "Test User", "test@example.com")
+            .unwrap();
+        config
+            .update_workspace("test", Some("New Name"), None)
+            .unwrap();
 
         let workspace = config.get_workspace("test").unwrap();
         assert_eq!(workspace.name, "New Name");
@@ -182,7 +188,9 @@ mod tests {
     #[test]
     fn test_delete_workspace_removes_config() {
         let mut config = Config::default();
-        config.add_workspace("test", "Test User", "test@example.com").unwrap();
+        config
+            .add_workspace("test", "Test User", "test@example.com")
+            .unwrap();
         config.delete_workspace("test").unwrap();
 
         assert!(config.get_workspace("test").is_err());
