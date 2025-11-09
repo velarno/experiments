@@ -106,6 +106,25 @@ Update both:
 figgit update work -n "Jane Doe" -e "jane.doe@company.com"
 ```
 
+### Import from existing git config
+
+Import a workspace from your current repository's local git config:
+```bash
+figgit import work
+```
+
+Import from global git config:
+```bash
+figgit import personal --global
+```
+
+Import from another repository:
+```bash
+figgit import client-project --from /path/to/repo
+```
+
+This is especially useful when you want to save your existing git configurations as workspaces.
+
 ### Check current status
 
 See your current git configuration and which workspace it matches:
@@ -186,6 +205,27 @@ figgit status  # Shows: ✓ Matches workspace: 'work'
 cd ~/personal/project
 figgit use personal
 figgit status  # Shows: ✓ Matches workspace: 'personal'
+```
+
+### Importing existing configurations
+
+If you already have git configured in various repositories, you can import them:
+
+```bash
+# In your work repository with existing config
+cd ~/work/project
+figgit import work
+# Imports the local config from this repo as 'work' workspace
+
+# Import your global config as a workspace
+figgit import personal --global
+
+# Import config from another repository
+figgit import opensource --from ~/oss/project
+
+# Now you can use these workspaces anywhere
+cd ~/new/work/project
+figgit use work
 ```
 
 ## CI/CD
