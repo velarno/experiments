@@ -246,11 +246,13 @@ mod tests {
         let config = WorkspaceConfig {
             name: "Test User".to_string(),
             email: "test@example.com".to_string(),
+            patterns: Vec::new(),
         };
         let workspace_name = "test".to_string();
         workspaces.insert(workspace_name.clone(), config);
 
-        let output: WorkspaceOutput = (&workspace_name, workspaces.get(&workspace_name).unwrap()).into();
+        let output: WorkspaceOutput =
+            (&workspace_name, workspaces.get(&workspace_name).unwrap()).into();
         assert_eq!(output.name, "test");
         assert_eq!(output.user_name, "Test User");
         assert_eq!(output.email, "test@example.com");
