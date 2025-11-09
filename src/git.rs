@@ -273,4 +273,67 @@ mod tests {
             assert!(!email.is_empty());
         }
     }
+
+    #[test]
+    fn test_get_global_config() {
+        // Test getting global config
+        // This is environment-dependent - global config may or may not be set
+        let result = get_global_config();
+
+        if result.is_ok() {
+            // If it succeeded, both name and email should be non-empty
+            let (name, email) = result.unwrap();
+            assert!(!name.is_empty(), "Global user.name should not be empty");
+            assert!(!email.is_empty(), "Global user.email should not be empty");
+        }
+        // If it failed, that's also valid (no global config set)
+    }
+
+    #[test]
+    fn test_get_config_from_repo_with_invalid_path() {
+        // Test with a non-existent path
+        let result = get_config_from_repo("/nonexistent/path/to/repo");
+        assert!(result.is_err(), "Should fail with non-existent path");
+    }
+
+    #[test]
+    fn test_get_config_from_repo_with_non_git_dir() {
+        // Test with a directory that exists but is not a git repo
+        let result = get_config_from_repo("/tmp");
+        assert!(result.is_err(), "Should fail with non-git directory");
+    }
+
+    #[test]
+    fn test_get_config_from_repo_with_current_dir() {
+        // Test with current directory if it's a git repo
+        if is_git_repo() {
+            // Try to get config from current directory
+            let result = get_config_from_repo(".");
+
+            // This might fail if local config is not set, which is valid
+            if result.is_ok() {
+                let (name, email) = result.unwrap();
+                assert!(!name.is_empty());
+                assert!(!email.is_empty());
+            }
+        }
+    }
+
+    #[test]
+    fn test_global_user_name_consistency() {
+        // If we can get global user name, getting it twice should return the same value
+        if let Ok(name1) = get_global_user_name() {
+            let name2 = get_global_user_name().unwrap();
+            assert_eq!(name1, name2, "Global user.name should be consistent");
+        }
+    }
+
+    #[test]
+    fn test_global_user_email_consistency() {
+        // If we can get global user email, getting it twice should return the same value
+        if let Ok(email1) = get_global_user_email() {
+            let email2 = get_global_user_email().unwrap();
+            assert_eq!(email1, email2, "Global user.email should be consistent");
+        }
+    }
 }

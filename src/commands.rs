@@ -223,4 +223,68 @@ mod tests {
 
         assert!(config.get_workspace("test").is_err());
     }
+
+    #[test]
+    fn test_import_workspace_from_global_config() {
+        // Test that we can attempt to get global config
+        // This is environment-dependent
+        let result = git::get_global_config();
+
+        if result.is_ok() {
+            let (name, email) = result.unwrap();
+            assert!(!name.is_empty(), "Global user.name should not be empty");
+            assert!(!email.is_empty(), "Global user.email should not be empty");
+
+            // Verify we can create a workspace with these values
+            let mut config = Config::default();
+            config.add_workspace("imported", &name, &email).unwrap();
+
+            let workspace = config.get_workspace("imported").unwrap();
+            assert_eq!(workspace.name, name);
+            assert_eq!(workspace.email, email);
+        }
+    }
+
+    #[test]
+    fn test_import_workspace_from_local_config() {
+        // Test that we can attempt to get local config
+        // This is environment-dependent
+        if git::is_git_repo() {
+            let result = git::get_local_config();
+
+            if result.is_ok() {
+                let (name, email) = result.unwrap();
+                assert!(!name.is_empty(), "Local user.name should not be empty");
+                assert!(!email.is_empty(), "Local user.email should not be empty");
+
+                // Verify we can create a workspace with these values
+                let mut config = Config::default();
+                config.add_workspace("imported-local", &name, &email).unwrap();
+
+                let workspace = config.get_workspace("imported-local").unwrap();
+                assert_eq!(workspace.name, name);
+                assert_eq!(workspace.email, email);
+            }
+        }
+    }
+
+    #[test]
+    fn test_import_workspace_from_invalid_repo() {
+        // Test that importing from an invalid repo fails gracefully
+        let result = git::get_config_from_repo("/nonexistent/path");
+        assert!(result.is_err(), "Should fail with invalid repository path");
+    }
+
+    #[test]
+    fn test_import_workspace_duplicate_name() {
+        // Test that importing with a duplicate workspace name fails
+        let mut config = Config::default();
+        config
+            .add_workspace("existing", "Existing User", "existing@example.com")
+            .unwrap();
+
+        // Attempting to add another workspace with the same name should fail
+        let result = config.add_workspace("existing", "New User", "new@example.com");
+        assert!(result.is_err(), "Should fail when workspace name already exists");
+    }
 }
