@@ -259,7 +259,9 @@ mod tests {
 
                 // Verify we can create a workspace with these values
                 let mut config = Config::default();
-                config.add_workspace("imported-local", &name, &email).unwrap();
+                config
+                    .add_workspace("imported-local", &name, &email)
+                    .unwrap();
 
                 let workspace = config.get_workspace("imported-local").unwrap();
                 assert_eq!(workspace.name, name);
@@ -285,6 +287,9 @@ mod tests {
 
         // Attempting to add another workspace with the same name should fail
         let result = config.add_workspace("existing", "New User", "new@example.com");
-        assert!(result.is_err(), "Should fail when workspace name already exists");
+        assert!(
+            result.is_err(),
+            "Should fail when workspace name already exists"
+        );
     }
 }

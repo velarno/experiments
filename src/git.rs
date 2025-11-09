@@ -173,7 +173,10 @@ pub fn get_user_name_from_repo(repo_path: &str) -> Result<String> {
     }
 
     if !repo_path.is_dir() {
-        bail!("Repository path is not a directory: {}", repo_path.display());
+        bail!(
+            "Repository path is not a directory: {}",
+            repo_path.display()
+        );
     }
 
     let git_dir = repo_path.join(".git");
@@ -182,12 +185,21 @@ pub fn get_user_name_from_repo(repo_path: &str) -> Result<String> {
     }
 
     let output = Command::new("git")
-        .args(["-C", repo_path.to_str().unwrap(), "config", "--local", "user.name"])
+        .args([
+            "-C",
+            repo_path.to_str().unwrap(),
+            "config",
+            "--local",
+            "user.name",
+        ])
         .output()
         .context("Failed to execute git command")?;
 
     if !output.status.success() {
-        bail!("No local user.name configured in repository: {}", repo_path.display());
+        bail!(
+            "No local user.name configured in repository: {}",
+            repo_path.display()
+        );
     }
 
     let name = String::from_utf8(output.stdout)
@@ -196,7 +208,10 @@ pub fn get_user_name_from_repo(repo_path: &str) -> Result<String> {
         .to_string();
 
     if name.is_empty() {
-        bail!("No local user.name configured in repository: {}", repo_path.display());
+        bail!(
+            "No local user.name configured in repository: {}",
+            repo_path.display()
+        );
     }
 
     Ok(name)
@@ -211,7 +226,10 @@ pub fn get_user_email_from_repo(repo_path: &str) -> Result<String> {
     }
 
     if !repo_path.is_dir() {
-        bail!("Repository path is not a directory: {}", repo_path.display());
+        bail!(
+            "Repository path is not a directory: {}",
+            repo_path.display()
+        );
     }
 
     let git_dir = repo_path.join(".git");
@@ -220,12 +238,21 @@ pub fn get_user_email_from_repo(repo_path: &str) -> Result<String> {
     }
 
     let output = Command::new("git")
-        .args(["-C", repo_path.to_str().unwrap(), "config", "--local", "user.email"])
+        .args([
+            "-C",
+            repo_path.to_str().unwrap(),
+            "config",
+            "--local",
+            "user.email",
+        ])
         .output()
         .context("Failed to execute git command")?;
 
     if !output.status.success() {
-        bail!("No local user.email configured in repository: {}", repo_path.display());
+        bail!(
+            "No local user.email configured in repository: {}",
+            repo_path.display()
+        );
     }
 
     let email = String::from_utf8(output.stdout)
@@ -234,7 +261,10 @@ pub fn get_user_email_from_repo(repo_path: &str) -> Result<String> {
         .to_string();
 
     if email.is_empty() {
-        bail!("No local user.email configured in repository: {}", repo_path.display());
+        bail!(
+            "No local user.email configured in repository: {}",
+            repo_path.display()
+        );
     }
 
     Ok(email)
