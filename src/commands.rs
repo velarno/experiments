@@ -1,5 +1,6 @@
 use crate::config::Config;
 use crate::git;
+use crate::output::{self, OutputFormat, StatusOutput};
 use anyhow::Result;
 
 /// Create a new workspace configuration
@@ -49,92 +50,71 @@ pub fn use_workspace(workspace: &str) -> Result<()> {
 }
 
 /// View workspace configurations
-pub fn view_workspace(workspace: Option<&str>) -> Result<()> {
+pub fn view_workspace(workspace: Option<&str>, format: OutputFormat) -> Result<()> {
     let config = Config::load()?;
-
-    if config.workspaces.is_empty() {
-        println!("No workspaces configured.");
-        println!("Use 'figgit new <workspace> --name <name> --email <email>' to create one.");
-        return Ok(());
-    }
 
     match workspace {
         Some(name) => {
             // View a specific workspace
             let workspace_config = config.get_workspace(name)?;
-            println!("Workspace: {}", name);
-            println!("  Name:  {}", workspace_config.name);
-            println!("  Email: {}", workspace_config.email);
+
+            match format {
+                OutputFormat::Json => {
+                    let output = serde_json::json!({
+                        "name": name,
+                        "user_name": workspace_config.name,
+                        "email": workspace_config.email
+                    });
+                    println!("{}", serde_json::to_string_pretty(&output).unwrap());
+                }
+                _ => {
+                    println!("Workspace: {}", name);
+                    println!("  Name:  {}", workspace_config.name);
+                    println!("  Email: {}", workspace_config.email);
+                }
+            }
         }
         None => {
             // View all workspaces
-            println!("Configured workspaces:");
-            println!();
-
-            let mut workspaces: Vec<_> = config.workspaces.iter().collect();
-            workspaces.sort_by_key(|(name, _)| *name);
-
-            for (name, workspace_config) in workspaces {
-                println!("  {}:", name);
-                println!("    Name:  {}", workspace_config.name);
-                println!("    Email: {}", workspace_config.email);
-                println!();
-            }
+            output::print_workspaces(&config.workspaces, format);
         }
     }
 
     Ok(())
 }
 
+/// List all workspace configurations
+pub fn list_workspaces(format: OutputFormat) -> Result<()> {
+    let config = Config::load()?;
+    output::print_workspaces(&config.workspaces, format);
+    Ok(())
+}
+
 /// Show the current git configuration and compare with workspaces
-pub fn status() -> Result<()> {
+pub fn status(format: OutputFormat) -> Result<()> {
     let config = Config::load()?;
 
-    println!("Git Configuration Status");
-    println!("━━━━━━━━━━━━━━━━━━━━━━━━");
-    println!();
+    let mut status_output = StatusOutput {
+        current_name: None,
+        current_email: None,
+        matching_workspace: None,
+        available_workspaces: config.workspaces.keys().cloned().collect(),
+    };
+
+    status_output.available_workspaces.sort();
 
     // Get current local git config
-    match git::get_local_config() {
-        Ok((name, email)) => {
-            println!("Current local git config:");
-            println!("  Name:  {}", name);
-            println!("  Email: {}", email);
-            println!();
+    if let Ok((name, email)) = git::get_local_config() {
+        status_output.current_name = Some(name.clone());
+        status_output.current_email = Some(email.clone());
 
-            // Try to find a matching workspace
-            if let Some((workspace_name, _)) = config.find_matching_workspace(&name, &email) {
-                println!("✓ Matches workspace: '{}'", workspace_name);
-            } else {
-                println!("⚠ Does not match any configured workspace");
-
-                if !config.workspaces.is_empty() {
-                    println!();
-                    println!("Available workspaces:");
-                    let mut workspaces: Vec<_> = config.workspaces.keys().collect();
-                    workspaces.sort();
-                    for workspace in workspaces {
-                        println!("  - {}", workspace);
-                    }
-                }
-            }
-        }
-        Err(e) => {
-            println!("⚠ Unable to read local git config: {}", e);
-            println!();
-
-            if !config.workspaces.is_empty() {
-                println!("Available workspaces:");
-                let mut workspaces: Vec<_> = config.workspaces.keys().collect();
-                workspaces.sort();
-                for workspace in workspaces {
-                    println!("  - {}", workspace);
-                }
-                println!();
-                println!("Use 'figgit use <workspace>' to apply a workspace configuration.");
-            }
+        // Try to find a matching workspace
+        if let Some((workspace_name, _)) = config.find_matching_workspace(&name, &email) {
+            status_output.matching_workspace = Some(workspace_name.clone());
         }
     }
+
+    output::print_status(&status_output, format);
 
     Ok(())
 }
