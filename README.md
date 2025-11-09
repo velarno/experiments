@@ -1,7 +1,7 @@
 # figgit
 
-[![CI](https://github.com/USERNAME/figgit/actions/workflows/ci.yml/badge.svg)](https://github.com/USERNAME/figgit/actions/workflows/ci.yml)
-[![Release](https://github.com/USERNAME/figgit/actions/workflows/release.yml/badge.svg)](https://github.com/USERNAME/figgit/actions/workflows/release.yml)
+[![CI](https://github.com/velarno/figgit/actions/workflows/ci.yml/badge.svg)](https://github.com/velarno/figgit/actions/workflows/ci.yml)
+[![Release](https://github.com/velarno/figgit/actions/workflows/release.yml/badge.svg)](https://github.com/velarno/figgit/actions/workflows/release.yml)
 
 A command-line tool for managing git configurations using workspace names.
 
@@ -24,7 +24,7 @@ A command-line tool for managing git configurations using workspace names.
 
 ```bash
 # Add the tap
-brew tap USERNAME/figgit
+brew tap velarno/figgit
 
 # Install figgit
 brew install figgit
@@ -41,7 +41,7 @@ cargo install figgit
 ### From Source
 
 ```bash
-git clone https://github.com/USERNAME/figgit.git
+git clone https://github.com/velarno/figgit.git
 cd figgit
 cargo build --release
 ```
@@ -50,7 +50,7 @@ The binary will be available at `./target/release/figgit`.
 
 ### Pre-built Binaries
 
-Download pre-built binaries for your platform from the [releases page](https://github.com/USERNAME/figgit/releases).
+Download pre-built binaries for your platform from the [releases page](https://github.com/velarno/figgit/releases).
 
 ## Usage
 

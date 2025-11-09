@@ -24,9 +24,9 @@ After creating a release, calculate SHA256 hashes for each platform:
 
 ```bash
 # Download the release artifacts
-wget https://github.com/USERNAME/figgit/releases/download/v0.1.0/figgit-x86_64-apple-darwin.tar.gz
-wget https://github.com/USERNAME/figgit/releases/download/v0.1.0/figgit-aarch64-apple-darwin.tar.gz
-wget https://github.com/USERNAME/figgit/releases/download/v0.1.0/figgit-x86_64-unknown-linux-gnu.tar.gz
+wget https://github.com/velarno/figgit/releases/download/v0.1.0/figgit-x86_64-apple-darwin.tar.gz
+wget https://github.com/velarno/figgit/releases/download/v0.1.0/figgit-aarch64-apple-darwin.tar.gz
+wget https://github.com/velarno/figgit/releases/download/v0.1.0/figgit-x86_64-unknown-linux-gnu.tar.gz
 
 # Calculate SHA256
 shasum -a 256 figgit-x86_64-apple-darwin.tar.gz
@@ -42,7 +42,7 @@ Once your tap is set up, users can install figgit with:
 
 ```bash
 # Add your tap
-brew tap USERNAME/figgit
+brew tap velarno/figgit
 
 # Install figgit
 brew install figgit
@@ -51,7 +51,7 @@ brew install figgit
 Or in one command:
 
 ```bash
-brew install USERNAME/figgit
+brew install velarno/figgit
 ```
 
 ## Option 2: Submit to Homebrew Core
