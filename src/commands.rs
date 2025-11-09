@@ -272,4 +272,27 @@ mod tests {
             "Should fail when workspace name already exists"
         );
     }
+
+    #[test]
+    fn test_list_workspaces_empty() {
+        // Test listing when there are no workspaces
+        let config = Config::default();
+        assert!(config.workspaces.is_empty());
+    }
+
+    #[test]
+    fn test_list_workspaces_with_data() {
+        // Test listing workspaces
+        let mut config = Config::default();
+        config
+            .add_workspace("work", "Work User", "work@example.com")
+            .unwrap();
+        config
+            .add_workspace("personal", "Personal User", "personal@example.com")
+            .unwrap();
+
+        assert_eq!(config.workspaces.len(), 2);
+        assert!(config.get_workspace("work").is_ok());
+        assert!(config.get_workspace("personal").is_ok());
+    }
 }
