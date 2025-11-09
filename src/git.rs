@@ -111,6 +111,142 @@ pub fn set_local_config(name: &str, email: &str) -> Result<()> {
     Ok(())
 }
 
+/// Get the git user.name from global config
+pub fn get_global_user_name() -> Result<String> {
+    let output = Command::new("git")
+        .args(["config", "--global", "user.name"])
+        .output()
+        .context("Failed to execute git command")?;
+
+    if !output.status.success() {
+        bail!("No global user.name configured");
+    }
+
+    let name = String::from_utf8(output.stdout)
+        .context("Invalid UTF-8 in git output")?
+        .trim()
+        .to_string();
+
+    if name.is_empty() {
+        bail!("No global user.name configured");
+    }
+
+    Ok(name)
+}
+
+/// Get the git user.email from global config
+pub fn get_global_user_email() -> Result<String> {
+    let output = Command::new("git")
+        .args(["config", "--global", "user.email"])
+        .output()
+        .context("Failed to execute git command")?;
+
+    if !output.status.success() {
+        bail!("No global user.email configured");
+    }
+
+    let email = String::from_utf8(output.stdout)
+        .context("Invalid UTF-8 in git output")?
+        .trim()
+        .to_string();
+
+    if email.is_empty() {
+        bail!("No global user.email configured");
+    }
+
+    Ok(email)
+}
+
+/// Get both user.name and user.email from global config
+pub fn get_global_config() -> Result<(String, String)> {
+    let name = get_global_user_name()?;
+    let email = get_global_user_email()?;
+    Ok((name, email))
+}
+
+/// Get user.name from a specific repository
+pub fn get_user_name_from_repo(repo_path: &str) -> Result<String> {
+    let repo_path = Path::new(repo_path);
+
+    if !repo_path.exists() {
+        bail!("Repository path does not exist: {}", repo_path.display());
+    }
+
+    if !repo_path.is_dir() {
+        bail!("Repository path is not a directory: {}", repo_path.display());
+    }
+
+    let git_dir = repo_path.join(".git");
+    if !git_dir.exists() {
+        bail!("Not a git repository: {}", repo_path.display());
+    }
+
+    let output = Command::new("git")
+        .args(["-C", repo_path.to_str().unwrap(), "config", "--local", "user.name"])
+        .output()
+        .context("Failed to execute git command")?;
+
+    if !output.status.success() {
+        bail!("No local user.name configured in repository: {}", repo_path.display());
+    }
+
+    let name = String::from_utf8(output.stdout)
+        .context("Invalid UTF-8 in git output")?
+        .trim()
+        .to_string();
+
+    if name.is_empty() {
+        bail!("No local user.name configured in repository: {}", repo_path.display());
+    }
+
+    Ok(name)
+}
+
+/// Get user.email from a specific repository
+pub fn get_user_email_from_repo(repo_path: &str) -> Result<String> {
+    let repo_path = Path::new(repo_path);
+
+    if !repo_path.exists() {
+        bail!("Repository path does not exist: {}", repo_path.display());
+    }
+
+    if !repo_path.is_dir() {
+        bail!("Repository path is not a directory: {}", repo_path.display());
+    }
+
+    let git_dir = repo_path.join(".git");
+    if !git_dir.exists() {
+        bail!("Not a git repository: {}", repo_path.display());
+    }
+
+    let output = Command::new("git")
+        .args(["-C", repo_path.to_str().unwrap(), "config", "--local", "user.email"])
+        .output()
+        .context("Failed to execute git command")?;
+
+    if !output.status.success() {
+        bail!("No local user.email configured in repository: {}", repo_path.display());
+    }
+
+    let email = String::from_utf8(output.stdout)
+        .context("Invalid UTF-8 in git output")?
+        .trim()
+        .to_string();
+
+    if email.is_empty() {
+        bail!("No local user.email configured in repository: {}", repo_path.display());
+    }
+
+    Ok(email)
+}
+
+/// Get both user.name and user.email from a specific repository
+pub fn get_config_from_repo(repo_path: &str) -> Result<(String, String)> {
+    let name = get_user_name_from_repo(repo_path)?;
+    let email = get_user_email_from_repo(repo_path)?;
+    Ok((name, email))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
