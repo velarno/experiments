@@ -39,6 +39,12 @@ enum Commands {
         /// Git user email (optional)
         #[arg(short, long)]
         email: Option<String>,
+        /// URL patterns for auto-detection (can be specified multiple times)
+        #[arg(short, long = "pattern", value_name = "PATTERN")]
+        patterns: Vec<String>,
+        /// Reset patterns list instead of appending
+        #[arg(long)]
+        reset: bool,
     },
     /// Apply a workspace configuration to the local git repository
     Use {
@@ -131,8 +137,16 @@ fn main() -> Result<()> {
             workspace,
             name,
             email,
+            patterns,
+            reset,
         } => {
-            commands::update_workspace(&workspace, name.as_deref(), email.as_deref())?;
+            commands::update_workspace(
+                &workspace,
+                name.as_deref(),
+                email.as_deref(),
+                patterns,
+                reset,
+            )?;
         }
         Commands::Use { workspace } => {
             commands::use_workspace(&workspace)?;
