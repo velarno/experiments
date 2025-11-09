@@ -54,6 +54,17 @@ enum Commands {
         /// Name of the workspace
         workspace: String,
     },
+    /// Import a workspace configuration from git config
+    Import {
+        /// Name of the workspace
+        workspace: String,
+        /// Import from global git config instead of local
+        #[arg(short, long)]
+        global: bool,
+        /// Import from a specific repository path
+        #[arg(short, long)]
+        from: Option<String>,
+    },
 }
 
 fn main() -> Result<()> {
@@ -85,6 +96,13 @@ fn main() -> Result<()> {
         }
         Commands::Delete { workspace } => {
             commands::delete_workspace(&workspace)?;
+        }
+        Commands::Import {
+            workspace,
+            global,
+            from,
+        } => {
+            commands::import_workspace(&workspace, global, from.as_deref())?;
         }
     }
 

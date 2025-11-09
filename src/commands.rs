@@ -150,6 +150,34 @@ pub fn delete_workspace(workspace: &str) -> Result<()> {
     Ok(())
 }
 
+/// Import a workspace configuration from git config
+pub fn import_workspace(workspace: &str, global: bool, from: Option<&str>) -> Result<()> {
+    let mut config = Config::load()?;
+
+    let (name, email) = if let Some(repo_path) = from {
+        // Import from a specific repository
+        println!("Importing from repository: {}", repo_path);
+        git::get_config_from_repo(repo_path)?
+    } else if global {
+        // Import from global config
+        println!("Importing from global git config");
+        git::get_global_config()?
+    } else {
+        // Import from local config (default)
+        println!("Importing from local git config");
+        git::get_local_config()?
+    };
+
+    config.add_workspace(workspace, &name, &email)?;
+    config.save()?;
+
+    println!("✓ Imported workspace '{}'", workspace);
+    println!("  Name:  {}", name);
+    println!("  Email: {}", email);
+
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
