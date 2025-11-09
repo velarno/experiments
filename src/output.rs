@@ -25,6 +25,8 @@ pub struct WorkspaceOutput {
     pub name: String,
     pub user_name: String,
     pub email: String,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub patterns: Vec<String>,
 }
 
 impl From<(&String, &WorkspaceConfig)> for WorkspaceOutput {
@@ -33,6 +35,7 @@ impl From<(&String, &WorkspaceConfig)> for WorkspaceOutput {
             name: name.clone(),
             user_name: config.name.clone(),
             email: config.email.clone(),
+            patterns: config.patterns.clone(),
         }
     }
 }
@@ -166,6 +169,12 @@ fn print_default_workspaces(workspaces: &HashMap<String, WorkspaceConfig>) {
         println!("  {}:", name);
         println!("    Name:  {}", workspace_config.name);
         println!("    Email: {}", workspace_config.email);
+        if !workspace_config.patterns.is_empty() {
+            println!("    Patterns:");
+            for pattern in &workspace_config.patterns {
+                println!("      - {}", pattern);
+            }
+        }
         println!();
     }
 }

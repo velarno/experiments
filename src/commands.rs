@@ -17,20 +17,44 @@ pub fn new_workspace(workspace: &str, name: &str, email: &str) -> Result<()> {
 }
 
 /// Update an existing workspace configuration
-pub fn update_workspace(workspace: &str, name: Option<&str>, email: Option<&str>) -> Result<()> {
-    if name.is_none() && email.is_none() {
-        println!("No changes specified. Use --name and/or --email to update the workspace.");
+pub fn update_workspace(
+    workspace: &str,
+    name: Option<&str>,
+    email: Option<&str>,
+    patterns: Vec<String>,
+    reset: bool,
+) -> Result<()> {
+    if name.is_none() && email.is_none() && patterns.is_empty() {
+        println!(
+            "No changes specified. Use --name, --email, and/or --pattern to update the workspace."
+        );
         return Ok(());
     }
 
     let mut config = Config::load()?;
-    config.update_workspace(workspace, name, email)?;
+
+    // Update name and email if provided
+    if name.is_some() || email.is_some() {
+        config.update_workspace(workspace, name, email)?;
+    }
+
+    // Update patterns if provided
+    if !patterns.is_empty() {
+        config.update_workspace_patterns(workspace, patterns, reset)?;
+    }
+
     config.save()?;
 
     println!("✓ Updated workspace '{}'", workspace);
     let updated = config.get_workspace(workspace)?;
-    println!("  Name:  {}", updated.name);
-    println!("  Email: {}", updated.email);
+    println!("  Name:     {}", updated.name);
+    println!("  Email:    {}", updated.email);
+    if !updated.patterns.is_empty() {
+        println!("  Patterns:");
+        for pattern in &updated.patterns {
+            println!("    - {}", pattern);
+        }
+    }
 
     Ok(())
 }
@@ -60,17 +84,26 @@ pub fn view_workspace(workspace: Option<&str>, format: OutputFormat) -> Result<(
 
             match format {
                 OutputFormat::Json => {
-                    let output = serde_json::json!({
+                    let mut output = serde_json::json!({
                         "name": name,
                         "user_name": workspace_config.name,
                         "email": workspace_config.email
                     });
+                    if !workspace_config.patterns.is_empty() {
+                        output["patterns"] = serde_json::json!(workspace_config.patterns);
+                    }
                     println!("{}", serde_json::to_string_pretty(&output).unwrap());
                 }
                 _ => {
                     println!("Workspace: {}", name);
                     println!("  Name:  {}", workspace_config.name);
                     println!("  Email: {}", workspace_config.email);
+                    if !workspace_config.patterns.is_empty() {
+                        println!("  Patterns:");
+                        for pattern in &workspace_config.patterns {
+                            println!("    - {}", pattern);
+                        }
+                    }
                 }
             }
         }
