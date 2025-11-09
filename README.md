@@ -14,6 +14,7 @@ A command-line tool for managing git configurations using workspace names.
 - Store multiple git configurations as named workspaces
 - Quickly switch between different git identities
 - Import existing git configurations from local, global, or other repositories
+- URL pattern matching for workspace auto-detection
 - Multiple output formats: default text, formatted tables, and JSON
 - View current git configuration and compare with saved workspaces
 - Shell completion support for Bash, Zsh, Fish, and PowerShell
@@ -149,6 +150,19 @@ Update both:
 figgit update work -n "Jane Doe" -e "jane.doe@company.com"
 ```
 
+Add URL patterns for auto-detection (append to existing):
+```bash
+figgit update work -p "github.com/company/*"
+figgit update work -p "gitlab.company.com/*" -p "bitbucket.org/company/*"
+```
+
+Reset patterns (replace all existing patterns):
+```bash
+figgit update work -p "github.com/newcompany/*" --reset
+```
+
+URL patterns support glob-style wildcards and can be used for future auto-detection features.
+
 ### Import from existing git config
 
 Import a workspace from your current repository's local git config:
@@ -215,11 +229,14 @@ Example configuration:
 [workspaces.work]
 name = "John Doe"
 email = "john.doe@company.com"
+patterns = ["github.com/company/*", "gitlab.company.com/*"]
 
 [workspaces.personal]
 name = "John Doe"
 email = "john@personal.com"
 ```
+
+The `patterns` field is optional and can be used to associate URL patterns with workspaces for future auto-detection features.
 
 ## Architecture
 
