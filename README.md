@@ -13,7 +13,11 @@ A command-line tool for managing git configurations using workspace names.
 
 - Store multiple git configurations as named workspaces
 - Quickly switch between different git identities
+- Import existing git configurations from local, global, or other repositories
+- URL pattern matching for workspace auto-detection
+- Multiple output formats: default text, formatted tables, and JSON
 - View current git configuration and compare with saved workspaces
+- Shell completion support for Bash, Zsh, Fish, and PowerShell
 - Simple TOML-based configuration storage
 - Comprehensive error handling and user-friendly messages
 - Cross-platform support (Linux, macOS, Windows)
@@ -80,6 +84,46 @@ View a specific workspace:
 figgit view work
 ```
 
+### List workspaces
+
+List all workspaces (alternative to `view`):
+```bash
+figgit list
+```
+
+With different output formats:
+```bash
+# Table format
+figgit list -t
+# Or: figgit list --format=table
+
+# JSON format
+figgit list -j
+# Or: figgit list --format=json
+```
+
+### Output formats
+
+Most display commands support different output formats:
+
+- **Default**: Human-readable text format (default)
+- **Table**: Formatted table with borders
+- **JSON**: Machine-readable JSON format
+
+Available on: `list`, `view`, `status`
+
+Examples:
+```bash
+# View all workspaces as a table
+figgit view -t
+
+# View specific workspace as JSON
+figgit view work -j
+
+# Check status in JSON format
+figgit status -j
+```
+
 ### Apply a workspace configuration
 
 Apply a workspace to your current git repository:
@@ -105,6 +149,19 @@ Update both:
 ```bash
 figgit update work -n "Jane Doe" -e "jane.doe@company.com"
 ```
+
+Add URL patterns for auto-detection (append to existing):
+```bash
+figgit update work -p "github.com/company/*"
+figgit update work -p "gitlab.company.com/*" -p "bitbucket.org/company/*"
+```
+
+Reset patterns (replace all existing patterns):
+```bash
+figgit update work -p "github.com/newcompany/*" --reset
+```
+
+URL patterns support glob-style wildcards and can be used for future auto-detection features.
 
 ### Import from existing git config
 
@@ -138,6 +195,31 @@ figgit status
 figgit delete work
 ```
 
+### Shell completions
+
+Generate shell completions for your shell:
+
+**Bash:**
+```bash
+figgit completion bash > ~/.local/share/bash-completion/completions/figgit
+```
+
+**Zsh:**
+```bash
+figgit completion zsh > ~/.zsh/completions/_figgit
+# Add to ~/.zshrc: fpath=(~/.zsh/completions $fpath)
+```
+
+**Fish:**
+```bash
+figgit completion fish > ~/.config/fish/completions/figgit.fish
+```
+
+**PowerShell:**
+```powershell
+figgit completion powershell | Out-String | Invoke-Expression
+```
+
 ## Configuration
 
 Workspaces are stored in `~/.config/figgit/config.toml`. The configuration file is created automatically when you create your first workspace.
@@ -147,20 +229,24 @@ Example configuration:
 [workspaces.work]
 name = "John Doe"
 email = "john.doe@company.com"
+patterns = ["github.com/company/*", "gitlab.company.com/*"]
 
 [workspaces.personal]
 name = "John Doe"
 email = "john@personal.com"
 ```
 
+The `patterns` field is optional and can be used to associate URL patterns with workspaces for future auto-detection features.
+
 ## Architecture
 
 The project is organized into several modules:
 
-- `main.rs` - CLI entry point and command routing
+- `main.rs` - CLI entry point, command routing, and shell completion
 - `config.rs` - Configuration management and TOML storage
-- `git.rs` - Git operations (reading/writing local config)
+- `git.rs` - Git operations (reading/writing local and global config)
 - `commands.rs` - Implementation of all subcommands
+- `output.rs` - Output formatting (default, table, JSON)
 
 ### Key Design Decisions
 

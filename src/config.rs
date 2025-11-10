@@ -8,6 +8,8 @@ use std::path::PathBuf;
 pub struct WorkspaceConfig {
     pub name: String,
     pub email: String,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub patterns: Vec<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Default)]
@@ -68,6 +70,7 @@ impl Config {
             WorkspaceConfig {
                 name: user_name.to_string(),
                 email: email.to_string(),
+                patterns: Vec::new(),
             },
         );
 
@@ -92,6 +95,33 @@ impl Config {
 
         if let Some(email) = email {
             workspace.email = email.to_string();
+        }
+
+        Ok(())
+    }
+
+    /// Update workspace URL patterns
+    pub fn update_workspace_patterns(
+        &mut self,
+        name: &str,
+        patterns: Vec<String>,
+        reset: bool,
+    ) -> Result<()> {
+        let workspace = self
+            .workspaces
+            .get_mut(name)
+            .context(format!("Workspace '{}' not found", name))?;
+
+        if reset {
+            // Replace entire patterns list
+            workspace.patterns = patterns;
+        } else {
+            // Append to existing patterns (avoiding duplicates)
+            for pattern in patterns {
+                if !workspace.patterns.contains(&pattern) {
+                    workspace.patterns.push(pattern);
+                }
+            }
         }
 
         Ok(())
@@ -232,5 +262,129 @@ mod tests {
         let workspace = deserialized.get_workspace("work").unwrap();
         assert_eq!(workspace.name, "John Doe");
         assert_eq!(workspace.email, "john@work.com");
+    }
+
+    #[test]
+    fn test_update_workspace_patterns_append() {
+        let mut config = Config::default();
+        config
+            .add_workspace("work", "John Doe", "john@work.com")
+            .unwrap();
+
+        // Append patterns
+        config
+            .update_workspace_patterns(
+                "work",
+                vec!["github.com/company/*".to_string()],
+                false,
+            )
+            .unwrap();
+
+        let workspace = config.get_workspace("work").unwrap();
+        assert_eq!(workspace.patterns.len(), 1);
+        assert_eq!(workspace.patterns[0], "github.com/company/*");
+
+        // Append more patterns
+        config
+            .update_workspace_patterns(
+                "work",
+                vec![
+                    "gitlab.company.com/*".to_string(),
+                    "bitbucket.org/company/*".to_string(),
+                ],
+                false,
+            )
+            .unwrap();
+
+        let workspace = config.get_workspace("work").unwrap();
+        assert_eq!(workspace.patterns.len(), 3);
+        assert!(workspace.patterns.contains(&"github.com/company/*".to_string()));
+        assert!(workspace.patterns.contains(&"gitlab.company.com/*".to_string()));
+        assert!(workspace.patterns.contains(&"bitbucket.org/company/*".to_string()));
+    }
+
+    #[test]
+    fn test_update_workspace_patterns_no_duplicates() {
+        let mut config = Config::default();
+        config
+            .add_workspace("work", "John Doe", "john@work.com")
+            .unwrap();
+
+        // Add pattern twice
+        config
+            .update_workspace_patterns(
+                "work",
+                vec!["github.com/company/*".to_string()],
+                false,
+            )
+            .unwrap();
+        config
+            .update_workspace_patterns(
+                "work",
+                vec!["github.com/company/*".to_string()],
+                false,
+            )
+            .unwrap();
+
+        let workspace = config.get_workspace("work").unwrap();
+        assert_eq!(workspace.patterns.len(), 1);
+    }
+
+    #[test]
+    fn test_update_workspace_patterns_reset() {
+        let mut config = Config::default();
+        config
+            .add_workspace("work", "John Doe", "john@work.com")
+            .unwrap();
+
+        // Add initial patterns
+        config
+            .update_workspace_patterns(
+                "work",
+                vec![
+                    "github.com/old/*".to_string(),
+                    "gitlab.com/old/*".to_string(),
+                ],
+                false,
+            )
+            .unwrap();
+
+        let workspace = config.get_workspace("work").unwrap();
+        assert_eq!(workspace.patterns.len(), 2);
+
+        // Reset with new patterns
+        config
+            .update_workspace_patterns(
+                "work",
+                vec!["github.com/new/*".to_string()],
+                true,
+            )
+            .unwrap();
+
+        let workspace = config.get_workspace("work").unwrap();
+        assert_eq!(workspace.patterns.len(), 1);
+        assert_eq!(workspace.patterns[0], "github.com/new/*");
+    }
+
+    #[test]
+    fn test_patterns_serialization() {
+        let mut config = Config::default();
+        config
+            .add_workspace("work", "John Doe", "john@work.com")
+            .unwrap();
+        config
+            .update_workspace_patterns(
+                "work",
+                vec!["github.com/company/*".to_string()],
+                false,
+            )
+            .unwrap();
+
+        let serialized = toml::to_string(&config).unwrap();
+        let deserialized: Config = toml::from_str(&serialized).unwrap();
+
+        let workspace = deserialized.get_workspace("work").unwrap();
+        assert_eq!(workspace.patterns.len(), 1);
+        assert_eq!(workspace.patterns[0], "github.com/company/*");
     }
 }
