@@ -273,11 +273,7 @@ mod tests {
 
         // Append patterns
         config
-            .update_workspace_patterns(
-                "work",
-                vec!["github.com/company/*".to_string()],
-                false,
-            )
+            .update_workspace_patterns("work", vec!["github.com/company/*".to_string()], false)
             .unwrap();
 
         let workspace = config.get_workspace("work").unwrap();
@@ -298,9 +294,15 @@ mod tests {
 
         let workspace = config.get_workspace("work").unwrap();
         assert_eq!(workspace.patterns.len(), 3);
-        assert!(workspace.patterns.contains(&"github.com/company/*".to_string()));
-        assert!(workspace.patterns.contains(&"gitlab.company.com/*".to_string()));
-        assert!(workspace.patterns.contains(&"bitbucket.org/company/*".to_string()));
+        assert!(workspace
+            .patterns
+            .contains(&"github.com/company/*".to_string()));
+        assert!(workspace
+            .patterns
+            .contains(&"gitlab.company.com/*".to_string()));
+        assert!(workspace
+            .patterns
+            .contains(&"bitbucket.org/company/*".to_string()));
     }
 
     #[test]
@@ -312,18 +314,10 @@ mod tests {
 
         // Add pattern twice
         config
-            .update_workspace_patterns(
-                "work",
-                vec!["github.com/company/*".to_string()],
-                false,
-            )
+            .update_workspace_patterns("work", vec!["github.com/company/*".to_string()], false)
             .unwrap();
         config
-            .update_workspace_patterns(
-                "work",
-                vec!["github.com/company/*".to_string()],
-                false,
-            )
+            .update_workspace_patterns("work", vec!["github.com/company/*".to_string()], false)
             .unwrap();
 
         let workspace = config.get_workspace("work").unwrap();
@@ -354,11 +348,7 @@ mod tests {
 
         // Reset with new patterns
         config
-            .update_workspace_patterns(
-                "work",
-                vec!["github.com/new/*".to_string()],
-                true,
-            )
+            .update_workspace_patterns("work", vec!["github.com/new/*".to_string()], true)
             .unwrap();
 
         let workspace = config.get_workspace("work").unwrap();
@@ -373,11 +363,7 @@ mod tests {
             .add_workspace("work", "John Doe", "john@work.com")
             .unwrap();
         config
-            .update_workspace_patterns(
-                "work",
-                vec!["github.com/company/*".to_string()],
-                false,
-            )
+            .update_workspace_patterns("work", vec!["github.com/company/*".to_string()], false)
             .unwrap();
 
         let serialized = toml::to_string(&config).unwrap();

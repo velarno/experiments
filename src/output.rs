@@ -48,10 +48,7 @@ pub struct StatusOutput {
     pub available_workspaces: Vec<String>,
 }
 
-pub fn print_workspaces(
-    workspaces: &HashMap<String, WorkspaceConfig>,
-    format: OutputFormat,
-) {
+pub fn print_workspaces(workspaces: &HashMap<String, WorkspaceConfig>, format: OutputFormat) {
     match format {
         OutputFormat::Json => {
             let output: Vec<WorkspaceOutput> = workspaces
@@ -242,10 +239,7 @@ mod tests {
             OutputFormat::from_str("default"),
             Some(OutputFormat::Default)
         );
-        assert_eq!(
-            OutputFormat::from_str("text"),
-            Some(OutputFormat::Default)
-        );
+        assert_eq!(OutputFormat::from_str("text"), Some(OutputFormat::Default));
         assert_eq!(OutputFormat::from_str("invalid"), None);
     }
 
